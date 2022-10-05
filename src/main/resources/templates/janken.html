@@ -9,6 +9,14 @@
 <body>
   <h1>Janken GAME!</h1>
   <p>[[${welcome}]]</p>
+  <a href="/jankengame?hand=g">グー</a>
+  <a href="/jankengame?hand=c">チョキ</a>
+  <a href="/jankengame?hand=p">パー</a>
+  <div th:if="${result}">
+    <p>[[${player}]]</p>
+    <p>[[${cpu}]]</p>
+    <p>[[${result}]]</p>
+  </div>
 </body>
 
 </html>
