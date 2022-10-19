@@ -41,6 +41,9 @@ public class JankenAuthConfiguration {
     http.authorizeHttpRequests()
         .mvcMatchers("/janken/**").authenticated();
     http.logout().logoutSuccessUrl("/"); // ログアウト時は "http://localhost:8000/" に戻る
+
+    http.csrf().disable();
+    http.headers().frameOptions().disable();
     return http.build();
   }
 
