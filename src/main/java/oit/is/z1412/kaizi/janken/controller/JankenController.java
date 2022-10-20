@@ -14,6 +14,8 @@ import org.springframework.ui.ModelMap;
 import oit.is.z1412.kaizi.janken.model.Entry;
 import oit.is.z1412.kaizi.janken.model.User;
 import oit.is.z1412.kaizi.janken.model.UserMapper;
+import oit.is.z1412.kaizi.janken.model.Match;
+import oit.is.z1412.kaizi.janken.model.MatchMapper;
 
 @Controller
 public class JankenController {
@@ -23,6 +25,9 @@ public class JankenController {
 
   @Autowired
   UserMapper userMapper;
+
+  @Autowired
+  MatchMapper matchMapper;
 
   @GetMapping("/janken")
   @Transactional
@@ -34,6 +39,8 @@ public class JankenController {
 
     ArrayList<User> users = userMapper.selectAllUser();
     model.addAttribute("users", users);
+    ArrayList<Match> matches = matchMapper.selectAllMatch();
+    model.addAttribute("matches", matches);
     return "janken.html";
   }
 
