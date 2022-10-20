@@ -44,6 +44,15 @@ public class JankenController {
     return "janken.html";
   }
 
+  @GetMapping("/match")
+  public String match(@RequestParam int id, Principal prin, ModelMap model) {
+    String user1 = prin.getName();
+    String user2 = userMapper.selectById(id).getName();
+    model.addAttribute("user1", user1);
+    model.addAttribute("user2", user2);
+    return "match.html";
+  }
+
   @GetMapping("/jankengame")
   public String buttle(@RequestParam String hand, ModelMap model) {
     String player = "";
