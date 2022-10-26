@@ -32,7 +32,12 @@ public class JankenAuthConfiguration {
         .password("$2y$10$ARaO1JuL/fXlTcf6WMfIw.Yq62XP5SRWl/73pVAIjSVaAaQ4zwSxS")
         .roles("USER")
         .build();
-    return new InMemoryUserDetailsManager(user1, user2, honda);
+    UserDetails igaki = users
+        .username("いがき")
+        .password("$2y$10$tm5NzO4jytVe.WibvdIV1eihp6u7WKN72dNI9z7hkDjbJFSFBqE9a")
+        .roles("USER")
+        .build();
+    return new InMemoryUserDetailsManager(user1, user2, honda, igaki);
   }
 
   @Bean
