@@ -15,7 +15,9 @@ import oit.is.z1412.kaizi.janken.model.Entry;
 import oit.is.z1412.kaizi.janken.model.User;
 import oit.is.z1412.kaizi.janken.model.UserMapper;
 import oit.is.z1412.kaizi.janken.model.Match;
+import oit.is.z1412.kaizi.janken.model.MatchInfo;
 import oit.is.z1412.kaizi.janken.model.MatchMapper;
+import oit.is.z1412.kaizi.janken.model.MatchInfoMapper;
 
 @Controller
 public class JankenController {
@@ -28,6 +30,9 @@ public class JankenController {
 
   @Autowired
   MatchMapper matchMapper;
+
+  @Autowired
+  MatchInfoMapper matchInfoMapper;
 
   @GetMapping("/janken")
   @Transactional
@@ -56,6 +61,7 @@ public class JankenController {
     User user1 = userMapper.selectByName(prin.getName());
     User user2 = userMapper.selectById(id);
     Match match = new Match();
+    MatchInfo matchInfo = new MatchInfo();
     String result = "";
 
     if (hand.equals("Gu")) {
@@ -73,12 +79,18 @@ public class JankenController {
 
     matchMapper.insertMatch(match);
 
+    matchInfo.setUser1(user1.getId());
+    matchInfo.setUser2(id);
+    matchInfo.setUser1Hand(hand);
+    matchInfo.setActive(true);
+    matchInfoMapper.insertMatchInfo(matchInfo);
+
     model.addAttribute("user1", user1);
     model.addAttribute("user2", user2);
     model.addAttribute("match", match);
     model.addAttribute("result", result);
 
-    return "match.html";
+    return "wait.html";
   }
 
   @GetMapping("/jankengame")
