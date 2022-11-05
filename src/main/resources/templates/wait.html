@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>janken</title>
+  <script>
+    window.onload = function () {
+      var sse = new EventSource('/result');
+      sse.onmessage = function (event) {
+        var result = document.getElementById("result");
+        var data = JSON.parse(event.data);
+        var head = "<h2>結果</h2>"
+        var str = "<p>Match: id " + data.id + " user1: " + data.user1 + " user2: " + data.user2 + " user1Hand: " + data.user1Hand + " user2Hand: " + data.user2Hand + "</p>";
+        var back = "<a href='/janken'>もどる</a>";
+
+        result.innerHTML = head + str + back;
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h1>相手の手を待っています</h1>
+  <p>Hi <span sec:authentication="name"></span></p>
+  <div id="result"></div>
+</body>
+
+</html>

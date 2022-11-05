@@ -9,13 +9,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.ui.ModelMap;
 
 import oit.is.z1412.kaizi.janken.model.Entry;
 import oit.is.z1412.kaizi.janken.model.User;
 import oit.is.z1412.kaizi.janken.model.UserMapper;
+import oit.is.z1412.kaizi.janken.service.AsyncKekka;
 import oit.is.z1412.kaizi.janken.model.Match;
+import oit.is.z1412.kaizi.janken.model.MatchInfo;
 import oit.is.z1412.kaizi.janken.model.MatchMapper;
+import oit.is.z1412.kaizi.janken.model.MatchInfoMapper;
 
 @Controller
 public class JankenController {
@@ -29,6 +33,12 @@ public class JankenController {
   @Autowired
   MatchMapper matchMapper;
 
+  @Autowired
+  MatchInfoMapper matchInfoMapper;
+
+  @Autowired
+  AsyncKekka kekka;
+
   @GetMapping("/janken")
   @Transactional
   public String janken(Principal prin, ModelMap model) {
@@ -41,6 +51,8 @@ public class JankenController {
     model.addAttribute("users", users);
     ArrayList<Match> matches = matchMapper.selectAllMatch();
     model.addAttribute("matches", matches);
+    ArrayList<MatchInfo> matchInfo = matchInfoMapper.selectAllActiveMatch();
+    model.addAttribute("matchInfo", matchInfo);
     return "janken.html";
   }
 
@@ -53,32 +65,35 @@ public class JankenController {
 
   @GetMapping("/fight")
   public String fight(@RequestParam int id, @RequestParam String hand, Principal prin, ModelMap model) {
-    User user1 = userMapper.selectByName(prin.getName());
-    User user2 = userMapper.selectById(id);
     Match match = new Match();
-    String result = "";
+    MatchInfo matchInfo = new MatchInfo();
+    int loginId = userMapper.selectByName(prin.getName()).getId();
+    ArrayList<MatchInfo> activeMatch = matchInfoMapper.selectAllActiveMatchById(loginId);
 
-    if (hand.equals("Gu")) {
-      result = "Draw";
-    } else if (hand.equals("Choki")) {
-      result = "You Lose!";
-    } else if (hand.equals("Pa")) {
-      result = "You Win!";
+    if (activeMatch.size() == 0) {
+      matchInfo.setUser1(loginId);
+      matchInfo.setUser2(id);
+      matchInfo.setUser1Hand(hand);
+      matchInfo.setActive(true);
+      matchInfoMapper.insertMatchInfo(matchInfo);
+    } else {
+      match.setUser1(loginId);
+      match.setUser2(id);
+      match.setUser1Hand(hand);
+      match.setUser2Hand(activeMatch.get(0).getUser1Hand());
+      match.setActive(true);
+      this.kekka.syncFinishMatch(match);
+      matchInfoMapper.updateById(activeMatch.get(0).getId());
     }
 
-    match.setUser1(user1.getId());
-    match.setUser2(id);
-    match.setUser1Hand(hand);
-    match.setUser2Hand("Gu");
+    return "wait.html";
+  }
 
-    matchMapper.insertMatch(match);
-
-    model.addAttribute("user1", user1);
-    model.addAttribute("user2", user2);
-    model.addAttribute("match", match);
-    model.addAttribute("result", result);
-
-    return "match.html";
+  @GetMapping("/result")
+  public SseEmitter result() {
+    final SseEmitter sseEmitter = new SseEmitter();
+    this.kekka.asyncShowResult(sseEmitter);
+    return sseEmitter;
   }
 
   @GetMapping("/jankengame")
